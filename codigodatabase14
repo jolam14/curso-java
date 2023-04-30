@@ -1,0 +1,95 @@
+package proyectoetapa1;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class coneccionDb {
+
+    public static void main(String[] args) {
+
+        // Configuración de la conexión a la base de datos
+        String url = "jdbc:sqlserver://localhost\\MSSQLSERVER;databaseName=D:\\curso de programador\\MSSQL16.SQLEXPRESS\\MSSQL\\DATA;integratedSecurity=true;";
+        String user = "DESKTOP-IH22E4G\\Usuario";
+        String password = "";
+        
+
+        // Declaración de variables
+        Connection conexion = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            // Conexión a la base de datos
+            conexion = DriverManager.getConnection(url, user, password);
+            System.out.println("Conexión exitosa a la base de datos");
+
+            // Consulta 3.a
+            statement = conexion.createStatement();
+            resultSet = statement.executeQuery("SELECT * FROM productos WHERE precio > 100");
+
+            System.out.println("Consulta 3.a:");
+            while (resultSet.next()) {
+                System.out.println("Producto: " + resultSet.getString("nombre") + ", Precio: " + resultSet.getDouble("precio"));
+            }
+
+            // Consulta 3.b
+            statement = conexion.createStatement();
+            resultSet = statement.executeQuery("SELECT COUNT(*) AS cantidad FROM productos");
+
+            System.out.println("Consulta 3.b:");
+            while (resultSet.next()) {
+                System.out.println("Cantidad de productos: " + resultSet.getInt("cantidad"));
+            }
+
+            // Consulta 3.c
+            statement = conexion.createStatement();
+            resultSet = statement.executeQuery("SELECT AVG(precio) AS promedio FROM productos");
+
+            System.out.println("Consulta 3.c:");
+            while (resultSet.next()) {
+                System.out.println("Precio promedio: " + resultSet.getDouble("promedio"));
+            }
+
+            // Consulta 3.d
+            PreparedStatement preparedStatement = conexion.prepareStatement("SELECT * FROM productos WHERE id = ?");
+            preparedStatement.setInt(1, 1);
+            resultSet = preparedStatement.executeQuery();
+
+            System.out.println("Consulta 3.d:");
+            while (resultSet.next()) {
+                System.out.println("Producto: " + resultSet.getString("nombre") + ", Precio: " + resultSet.getDouble("precio"));
+            }
+
+            // Consulta 3.e
+            preparedStatement = conexion.prepareStatement("INSERT INTO productos (nombre, precio) VALUES (?, ?)");
+            preparedStatement.setString(1, "Nuevo producto");
+            preparedStatement.setDouble(2, 50.0);
+            int filasAfectadas = preparedStatement.executeUpdate();
+
+            System.out.println("Consulta 3.e:");
+            System.out.println("Filas afectadas: " + filasAfectadas);
+
+        } catch (SQLException e) {
+            System.out.println("Error al conectarse a la base de datos: " + e.getMessage());
+        } finally {
+            try {
+                // Cierre de recursos
+                if (resultSet != null) {
+                    resultSet.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+                if (conexion != null) {
+                    conexion.close();
+                }
+            } catch (SQLException e) {
+                System.out.println("Error al cerrar los recursos: " + e.getMessage());
+            }
+        }
+    }
+}
